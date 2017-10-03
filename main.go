@@ -14,18 +14,21 @@ import (
 var client *twitter.Client
 
 func TweetHandler(w http.ResponseWriter, r *http.Request) {
-	// Home Timeline
-	tweets, _, err := client.Timelines.HomeTimeline(&twitter.HomeTimelineParams{
-		Count: 20,
+	tweets, resp, err := client.Timelines.UserTimeline(&twitter.UserTimelineParams{
+		ScreenName: "kodingforvoksne",
 	})
 
 	if err != nil {
+		fmt.Println(err)
+		fmt.Println(resp)
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	b, err := json.Marshal(tweets)
 	if err != nil {
+		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -65,14 +68,6 @@ func main() {
 	mux.HandleFunc("/tweets", TweetHandler)
 	mux.HandleFunc("/", IndexHandler)
 	mux.Handle("/public/", http.FileServer(http.Dir(".")))
-
-	// Send a Tweet
-	//tweet, resp, err := client.Statuses.Update("Hello World!", nil)
-
-	//if err != nil {
-	//	fmt.Println("Could not tweet :(")
-	//	return
-	//}
 
 	port := "8080"
 
