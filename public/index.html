@@ -1,9 +1,54 @@
 <head>
-    <script src="/public/p5.js"></script>
-    <script src="/public/sketch.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.shoelace.style/1.0.0-beta22/shoelace.css">
+    <style>
+        #vert {
+          border-left: solid #ccc;
+              width: 1px;
+        }
+    </style>
+
+    <script> 
+    var tweets = [];
+    getTweets();
+    
+    function getTweets(){            
+        d3.json("/tweets", function(error, data){
+        tweets = data; 
+        var p = d3.select("#tweets").selectAll("div").data(tweets) 
+
+        tw = p.enter().append("div")
+                .attr("class","row")
+                .append("div")
+                .attr("class","col")
+                .append("p")
+                .html(function(d){
+                    tweet = d.text;
+                    created = d.created_at;
+                    str = "<h2>"+tweet+"</h2><small>"+created+"</small>"
+                    return str;
+                })
+        }); 
+    }
+
+    </script> 
 </head>
 
 <body>
     <h1> Lær Voksne Koding! </h1>
-
+    <div class="row">
+        <div class="col">
+    <p> Til venstre ser dere tweets fra <a
+        href="http://twitter.com/kodingforvoksne">@kodingforvoksne</a>, og til
+    høyre ser dere alle meldingene som kommer inn fra micro:bit-ene rundt om
+    kring i rommet. 
+        </p> 
+        </div>
+    </div>
+    <div class="row">
+        <div id ="tweets" class="col"><p>@kodingforvoksne</p></div>
+        <div id="vert" class="col-1"></div>
+        <div id="microbit" class="col"></div>
+    </div>
+    </div>
 </body>

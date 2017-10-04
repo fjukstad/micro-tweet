@@ -6,12 +6,20 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 )
 
 var client *twitter.Client
+var Messages []Message
+
+type Message struct {
+	From    string
+	Message string
+}
 
 func TweetHandler(w http.ResponseWriter, r *http.Request) {
 	tweets, resp, err := client.Timelines.UserTimeline(&twitter.UserTimelineParams{
@@ -33,6 +41,26 @@ func TweetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(b)
+}
+
+func MessageHandler(w http.ResponseWriter, r *http.Request) {
+	b, err := json.Marshal(messages)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(b)
+}
+
+func GenerateMessages() {
+	i := 0
+	for {
+		from := "From " + strconv.Itoa(i)
+		message := "Message " + strconv.Itoa(i)
+		messages = append(messages, Message{from, message})
+		time.Sleep(10 * time.Second)
+	}
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
