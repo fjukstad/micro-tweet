@@ -44,7 +44,7 @@ func TweetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MessageHandler(w http.ResponseWriter, r *http.Request) {
-	b, err := json.Marshal(messages)
+	b, err := json.Marshal(Messages)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -53,13 +53,17 @@ func MessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func GenerateMessages() {
+func generateMessages() {
 	i := 0
 	for {
 		from := "From " + strconv.Itoa(i)
 		message := "Message " + strconv.Itoa(i)
-		messages = append(messages, Message{from, message})
-		time.Sleep(10 * time.Second)
+		Messages = append([]Message{Message{from, message}}, Messages...)
+		i = i + 1
+		if len(Messages) > 100 {
+			Messages = Messages[:99]
+		}
+		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -94,8 +98,11 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/tweets", TweetHandler)
+	mux.HandleFunc("/messages", MessageHandler)
 	mux.HandleFunc("/", IndexHandler)
 	mux.Handle("/public/", http.FileServer(http.Dir(".")))
+
+	go generateMessages()
 
 	port := "8080"
 

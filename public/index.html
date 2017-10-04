@@ -10,13 +10,17 @@
 
     <script> 
     var tweets = [];
+    var messages = [];
+    var m;
+    
     getTweets();
+    getMessages();
     
     function getTweets(){            
         d3.json("/tweets", function(error, data){
         tweets = data; 
-        var p = d3.select("#tweets").selectAll("div").data(tweets) 
 
+        var p = d3.select("#tweets").selectAll("div").data(tweets) 
         tw = p.enter().append("div")
                 .attr("class","row")
                 .append("div")
@@ -29,6 +33,34 @@
                     return str;
                 })
         }); 
+    }
+
+    function getMessages(){
+         d3.json("/messages", function(error, data){
+            messages = data; 
+            
+            m = d3.select("#messages").selectAll("p").data(messages); 
+          
+            m.exit().remove();
+            
+            m.enter().append("div")
+                .attr("class","row")
+                .append("div")
+                .attr("class","col")
+                .append("p")
+                .html(function(d){
+                    return JSON.stringify(d);
+                })
+                
+            
+                m.html(function(d){
+                    return JSON.stringify(d);
+                })
+
+
+            console.log("Updated") 
+            setTimeout(getMessages, 1000);
+          }); 
     }
 
     </script> 
@@ -46,9 +78,9 @@
         </div>
     </div>
     <div class="row">
-        <div id ="tweets" class="col"><p>@kodingforvoksne</p></div>
+        <div id ="tweets" class="col"></div>
         <div id="vert" class="col-1"></div>
-        <div id="microbit" class="col"></div>
+        <div id="messages" class="col"></div>
     </div>
     </div>
 </body>
