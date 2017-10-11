@@ -20,7 +20,8 @@
         d3.json("/tweets", function(error, data){
         tweets = data; 
 
-        var p = d3.select("#tweets").selectAll("div").data(tweets) 
+        var p = d3.select("#tweets").selectAll("p").data(tweets);
+
         tw = p.enter().append("div")
                 .attr("class","row")
                 .append("div")
@@ -32,6 +33,17 @@
                     str = "<h2>"+tweet+"</h2><small>"+created+"</small>"
                     return str;
                 })
+        
+            p.html(function(d){
+                    tweet = d.text;
+                    created = d.created_at;
+                    str = "<h2>"+tweet+"</h2><small>"+created+"</small>"
+                    return str;
+                }); 
+        p.exit().remove();
+            
+        setTimeout(getTweets, 10000);
+            
         }); 
     }
 
@@ -41,7 +53,6 @@
             
             m = d3.select("#messages").selectAll("p").data(messages); 
           
-            m.exit().remove();
             
             m.enter().append("div")
                 .attr("class","row")
@@ -49,14 +60,40 @@
                 .attr("class","col")
                 .append("p")
                 .html(function(d){
-                    return JSON.stringify(d);
+                    if(d.Invalid){ 
+                        str = "Invalid message: "+d.Raw;
+                    } else { 
+                        str = "From: '"+d.From+"'";
+                        str += " Message: '"+d.Message+"'";
+                    }
+                    return str; 
                 })
-                
+                .attr("style", function(d){
+                    if(d.Invalid){
+                        return "color:red;"
+                    } else {
+                        return "color:black;"
+                    }})
+
             
                 m.html(function(d){
-                    return JSON.stringify(d);
+                    if(d.Invalid){ 
+                        str = "Invalid message: "+d.Raw;
+                    } else { 
+                        str = "From: '"+d.From+"'";
+                        str += " Message: '"+d.Message+"'";
+                    }
+                    return str; 
                 })
+                .attr("style", function(d){
+                    if(d.Invalid){
+                        return "color:red;"
+                    } else {
+                        return "color:black;"
+                }})
 
+
+            m.exit().remove();
 
             console.log("Updated") 
             setTimeout(getMessages, 1000);

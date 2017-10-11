@@ -5,12 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
-	"strconv"
-	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	"github.com/tarm/serial"
 )
 
 var client *twitter.Client
@@ -19,6 +19,8 @@ var Messages []Message
 type Message struct {
 	From    string
 	Message string
+	Invalid bool
+	Raw     string
 }
 
 func TweetHandler(w http.ResponseWriter, r *http.Request) {
@@ -53,20 +55,6 @@ func MessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func generateMessages() {
-	i := 0
-	for {
-		from := "From " + strconv.Itoa(i)
-		message := "Message " + strconv.Itoa(i)
-		Messages = append([]Message{Message{from, message}}, Messages...)
-		i = i + 1
-		if len(Messages) > 100 {
-			Messages = Messages[:99]
-		}
-		time.Sleep(1 * time.Second)
-	}
-}
-
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	indexTemplate := template.Must(template.ParseFiles("public/index.html"))
 	err := indexTemplate.Execute(w, nil)
@@ -75,6 +63,45 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func microMessages() error {
+	port := "/dev/ttyp3"
+	c := &serial.Config{Name: port, Baud: 115200}
+	s, err := serial.OpenPort(c)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer s.Close()
+
+	fmt.Println("Waiting for messages on port", port)
+	for {
+
+		buf := make([]byte, 500)
+		n, err := s.Read(buf)
+		if err != nil {
+			return err
+		}
+
+		buf = buf[:n]
+
+		var m Message
+		err = json.Unmarshal(buf, &m)
+		if err != nil {
+			fmt.Println("Invalid message:", string(buf))
+			m = Message{Invalid: true, Raw: string(buf)}
+		}
+
+		Messages = append([]Message{m}, Messages...)
+		if len(Messages) > 100 {
+			Messages = Messages[:99]
+		}
+
+		_, _, err = client.Statuses.Update(m.From+": "+m.Message, nil)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	return nil
+}
 func main() {
 
 	var consumerKey = flag.String("consumer-key", "", "Twitter Consumer Key (API Key).")
@@ -102,7 +129,7 @@ func main() {
 	mux.HandleFunc("/", IndexHandler)
 	mux.Handle("/public/", http.FileServer(http.Dir(".")))
 
-	go generateMessages()
+	go microMessages()
 
 	port := "8080"
 
