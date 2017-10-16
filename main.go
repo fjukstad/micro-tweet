@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -62,9 +63,8 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 }
-
 func microMessages() error {
-	port := "/dev/ttyp3"
+	port := "/dev/tty.usbmodem1412"
 	c := &serial.Config{Name: port, Baud: 115200}
 	s, err := serial.OpenPort(c)
 	if err != nil {
@@ -75,19 +75,29 @@ func microMessages() error {
 	fmt.Println("Waiting for messages on port", port)
 	for {
 
-		buf := make([]byte, 500)
-		n, err := s.Read(buf)
-		if err != nil {
-			return err
+		var msg string
+		for {
+			buf := make([]byte, 500)
+			n, err := s.Read(buf)
+			if err != nil {
+				return err
+			}
+
+			buf = buf[:n]
+
+			msg += string(buf)
+			if strings.Contains(msg, "\n") {
+				break
+			}
 		}
 
-		buf = buf[:n]
+		b := []byte(msg)
 
 		var m Message
-		err = json.Unmarshal(buf, &m)
+		err = json.Unmarshal(b, &m)
 		if err != nil {
-			fmt.Println("Invalid message:", string(buf))
-			m = Message{Invalid: true, Raw: string(buf)}
+			fmt.Println("Invalid message:", string(b))
+			m = Message{Invalid: true, Raw: string(b)}
 		}
 
 		Messages = append([]Message{m}, Messages...)
