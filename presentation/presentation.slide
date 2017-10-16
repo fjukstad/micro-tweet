@@ -5,12 +5,19 @@ Ph.D. Students
 Department of Computer Science, Department of Molecular Biology
 [[mailto:bjorn.fjukstad@uit.no][bjorn.fjukstad@uit.no]] | [[mailto:morten.gronnesby@uit.no][morten.gronnesby@uit.no]]
 [[http://twitter.com/fjukstad][@fjukstad]]
-_23._ _August_ _2017_ 
+_16._ _October_ _2017_ 
 
 * Micro:bit – programmering og introduksjon til Internet of Things
 - Generelt om programmering
 - Internet of Things
 - Praktisk oppgave: Tweet fra en micro:bit
+
+* Hva er Internet of Things??
+- Buzzword. 
+- En fancy måte å si ting som er koblet opp til internett
+- Klokker, kjøleskap, bil, varmovn osv. 
+- Snakker til hverandre med standardiserte og åpne dataformat 
+- Bluetooth, Wi-Fi, RFID (tenk busskort) 
 
 * JSON
 - Dataformat som ofte brukes til å kommunisere på internett 
@@ -21,7 +28,22 @@ _23._ _August_ _2017_
 
     {"City": "Tromsø", "Lat":69.6492, "Long":18.9553, "Temperature": 2, "Precipitation":...}
 
-# http://data.helsenorge.no/healthservices?$top=10&latitude=59.931&longitude=10.318
-* Twitter API
+* Helsenorge
+- [[http://data.helsenorge.no/healthservices?$top=10&latitude=69.931&longitude=19.318]]
 
-* 
+# http://data.helsenorge.no/healthservices?$top=10&latitude=59.931&longitude=10.318
+
+* Programmeringsoppgave 
+- Vi har en Micro:bit som er koblet opp til internett og Twitter! 
+- Tweeter på [[https://twitter.com/kodingforvoksne]]
+- Deres oppgave: Sende meldinger til Micro:bit-en på et bestemt format slik at det blir tweets ut av dem
+
+    {"From": "Bjørn", "Message": "Hei dette er en Tweet"}
+
+* Vår micro:bit 
+- Videresender alle radiomeldinger over USB
+.image micro-serial-code.png 200 _
+- Har et program som videresender de til Twitter
+- Kode ligger på [[https://github.com/fjukstad/micro-tweet]]
+
+# seksjon 4
